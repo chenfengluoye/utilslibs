@@ -2,6 +2,8 @@ package com.ckj.projects;
 
 import java.io.*;
 import java.net.*;
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -175,5 +177,83 @@ public class HttpsUtils {
             e.printStackTrace();
             return "";
         }
+    }
+
+    public static boolean ping(String ipAddress) throws Exception{
+        int timeOut=3000;
+        boolean status=InetAddress.getByName(ipAddress).isReachable(timeOut);   // 当返回值是true时，说明host是可用的
+        return status;
+    }
+
+    public static String getNet(String url, Map<String,String> headers) throws RuntimeException {
+        StringBuilder builder=new StringBuilder();
+        try{
+            URL urls=new URL(url);
+            HttpURLConnection con= (HttpURLConnection) urls.openConnection();
+            con.setRequestMethod("GET");
+            if(headers!=null){
+                for(Map.Entry<String,String> entry:headers.entrySet()){
+                    con.setRequestProperty(entry.getKey(),entry.getValue());
+                }
+            }
+            con.setDoInput(true);
+            String line=null;
+
+            BufferedReader reader=new BufferedReader(new InputStreamReader(con.getInputStream()));
+            while ((line=reader.readLine())!=null){
+                builder.append(line+"\n");
+            }
+            if(builder.length()>0){
+                builder.deleteCharAt(builder.length()-1);
+            }
+            return builder.toString();
+        }catch (Exception e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static String postNet(String url, Map<String,String> headers,String data) throws RuntimeException {
+        StringBuilder builder=new StringBuilder();
+        try{
+            URL urls=new URL(url);
+            HttpURLConnection con= (HttpURLConnection) urls.openConnection();
+            con.setRequestMethod("POST");
+            if(headers!=null){
+                for(Map.Entry<String,String> entry:headers.entrySet()){
+                    con.setRequestProperty(entry.getKey(),entry.getValue());
+                }
+            }
+            con.setDoInput(true);
+            if(data!=null&&!data.equals("")){
+                con.setDoOutput(true);
+                BufferedWriter writer=new BufferedWriter(new OutputStreamWriter(con.getOutputStream()));
+                writer.write(data);
+                writer.flush();
+            }
+            String line=null;
+            BufferedReader reader=new BufferedReader(new InputStreamReader(con.getInputStream()));
+            while ((line=reader.readLine())!=null){
+                builder.append(line+"\n");
+            }
+            if(builder.length()>0){
+                builder.deleteCharAt(builder.length()-1);
+            }
+            return builder.toString();
+        }catch (Exception e){
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static Map<String,String> getHeader(String headStr){
+        Map<String,String> map=new HashMap<>();
+        String[] kvs=headStr.split("\n");
+        for(String kv:kvs){
+            if(kv.contains(":")){
+                String k=kv.substring(0,kv.indexOf(":"));
+                String v=kv.substring(kv.indexOf(": ")+2);
+                map.put(k,v);
+            }
+        }
+        return map;
     }
 }

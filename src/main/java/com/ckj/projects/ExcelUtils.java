@@ -16,6 +16,7 @@ import java.util.*;
 /**
  * created by ChenKaiJu on 2018/8/29  11:57
  */
+@Deprecated
 public class ExcelUtils {
 
     public static JSONObject objToSingleJsonObj(Object obj){
